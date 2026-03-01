@@ -1,0 +1,95 @@
+/* ── Register Page ──────────────────────────────────────────── */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 80% 20%, rgba(200,133,42,0.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 15% 80%, rgba(200,133,42,0.05) 0%, transparent 50%);
+  padding: 24px 16px;
+}
+
+.register-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: var(--shadow-lg);
+}
+
+.register-brand {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.register-brand-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--primary-soft);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  border: 1px solid rgba(200,133,42,0.2);
+}
+.register-brand-icon i { color: var(--primary); font-size: 1.5rem; }
+
+.register-brand h1 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.register-brand p { color: var(--text-3); font-size: 0.9rem; }
+
+.register-form-group { margin-bottom: 16px; }
+
+.register-input-wrap {
+  position: relative;
+}
+.register-input-wrap i {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.register-input-wrap .cc-input { padding-left: 36px; }
+
+.register-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.register-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 12px;
+  font-size: 0.95rem;
+  margin-top: 6px;
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.875rem;
+  color: var(--text-3);
+}
+.register-footer a {
+  color: var(--primary);
+  font-weight: 600;
+}
+.register-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .register-box { padding: 28px 20px; }
+  .register-row { grid-template-columns: 1fr; }
+}
