@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import '../styles/theme.css';
 import '../styles/Chat.css';
 
-const SOCKET_URL = 'http://localhost:5000';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
 
 const Chat = () => {
   const navigate               = useNavigate();
