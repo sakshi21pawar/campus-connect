@@ -12,11 +12,17 @@ connectDB();
 const app    = express();
 const server = http.createServer(app);
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://campusconnect-iota-seven.vercel.app',
+];
+
 // ── Socket.io setup ───────────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
+    credentials: true,
   }
 });
 
@@ -40,16 +46,13 @@ io.on('connection', (socket) => {
   const userId = socket.userId;
   onlineUsers.set(userId, socket.id);
 
-  // Broadcast online users list to everyone
   io.emit('onlineUsers', Array.from(onlineUsers.keys()));
 
-  // Handle sending a message
   socket.on('sendMessage', async ({ receiverId, text }) => {
     try {
       const Message = require('./models/Message');
       const User    = require('./models/User');
 
-      // Verify connection before allowing message
       const sender = await User.findById(userId);
       if (!sender.connections.map(c => c.toString()).includes(receiverId)) return;
 
@@ -64,18 +67,16 @@ io.on('connection', (socket) => {
         { path: 'receiver', select: 'name profilePic' },
       ]);
 
-      // Send to receiver if online
       const receiverSocketId = onlineUsers.get(receiverId);
       if (receiverSocketId) {
         io.to(receiverSocketId).emit('receiveMessage', populated);
         io.to(receiverSocketId).emit('newMessageNotification', {
-          from:    populated.sender,
-          text:    populated.text,
-          chatId:  userId,
+          from:   populated.sender,
+          text:   populated.text,
+          chatId: userId,
         });
       }
 
-      // Send back to sender (confirmation)
       socket.emit('receiveMessage', populated);
 
     } catch (err) {
@@ -83,7 +84,6 @@ io.on('connection', (socket) => {
     }
   });
 
-  // Mark messages as read
   socket.on('markRead', async ({ senderId }) => {
     try {
       const Message = require('./models/Message');
@@ -91,7 +91,6 @@ io.on('connection', (socket) => {
         { sender: senderId, receiver: userId, read: false },
         { $set: { read: true } }
       );
-      // Notify sender their messages were read
       const senderSocketId = onlineUsers.get(senderId);
       if (senderSocketId) {
         io.to(senderSocketId).emit('messagesRead', { by: userId });
@@ -99,19 +98,14 @@ io.on('connection', (socket) => {
     } catch (err) { console.error(err); }
   });
 
-  // Typing indicator
   socket.on('typing', ({ receiverId }) => {
     const receiverSocketId = onlineUsers.get(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('userTyping', { from: userId });
-    }
+    if (receiverSocketId) io.to(receiverSocketId).emit('userTyping', { from: userId });
   });
 
   socket.on('stopTyping', ({ receiverId }) => {
     const receiverSocketId = onlineUsers.get(receiverId);
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('userStopTyping', { from: userId });
-    }
+    if (receiverSocketId) io.to(receiverSocketId).emit('userStopTyping', { from: userId });
   });
 
   socket.on('disconnect', () => {
@@ -122,7 +116,10 @@ io.on('connection', (socket) => {
 
 // ── Express Middleware ────────────────────────────────────────
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 
 // ── Routes ───────────────────────────────────────────────────
 app.use('/api/auth',      require('./routes/auth'));
@@ -134,7 +131,6 @@ app.use('/api/chat',      require('./routes/chat'));
 
 app.get('/api/test', (req, res) => res.json({ message: 'Backend is running!' }));
 
-// ── Start ─────────────────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`Server + Socket.io running on port ${PORT}`);
