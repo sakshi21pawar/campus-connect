@@ -23,7 +23,8 @@ const io = new Server(server, {
     origin: allowedOrigins,
     methods: ['GET', 'POST'],
     credentials: true,
-  }
+  },
+  transports: ['websocket', 'polling'],
 });
 
 // Map userId → socketId for direct messaging
